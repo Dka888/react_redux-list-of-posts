@@ -1,23 +1,18 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
-import { UserContext } from './UsersContext';
-import { User } from '../types/User';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { fetchUsers } from '../features/users/usersSlice';
+import { setAuthor } from '../features/author/authorSlice';
 
-type Props = {
-  value: User | null;
-  onChange: (user: User) => void;
-};
+export const UserSelector: React.FC = () => {
+  const users = useAppSelector(state => state.users.value);
+  const author = useAppSelector(state => state.author.author);
+  const dispatch = useAppDispatch();
 
-export const UserSelector: React.FC<Props> = ({
-  // `value` and `onChange` are traditional names for the form field
-  // `selectedUser` represents what actually stored here
-  value: selectedUser,
-  onChange,
-}) => {
-  // `users` are loaded from the API, so for the performance reasons
-  // we load them once in the `UsersContext` when the `App` is opened
-  // and now we can easily reuse the `UserSelector` in any form
-  const users = useContext(UserContext);
+  useEffect(() => {
+    dispatch(fetchUsers());
+  }, [dispatch]);
+
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
@@ -58,7 +53,7 @@ export const UserSelector: React.FC<Props> = ({
           }}
         >
           <span>
-            {selectedUser?.name || 'Choose a user'}
+            {author?.name || 'Choose a user'}
           </span>
 
           <span className="icon is-small">
@@ -74,10 +69,10 @@ export const UserSelector: React.FC<Props> = ({
               key={user.id}
               href={`#user-${user.id}`}
               onClick={() => {
-                onChange(user);
+                dispatch(setAuthor(user));
               }}
               className={classNames('dropdown-item', {
-                'is-active': user.id === selectedUser?.id,
+                'is-active': user.id === author?.id,
               })}
             >
               {user.name}
